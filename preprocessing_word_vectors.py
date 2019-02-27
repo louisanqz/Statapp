@@ -16,7 +16,7 @@ from gensim.models import KeyedVectors
 
 """ #### DATA and CLEANING #### """
 data=pd.read_excel("verbatims_SRC_230118_ENSAE.xlsx")
-#predefined train and test set for consistency 
+# predefined train and test set for consistency 
 train=pd.read_excel("Train.xlsx")
 test=pd.read_excel("Test.xlsx")
 
