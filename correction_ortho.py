@@ -15,7 +15,7 @@ spell = SpellChecker(language='fr')
 import requests, json
 
 
-""" check spell with google """
+""" # check spell with google # """
 
 def correct_google(text,typ="all"):
     URL="http://suggestqueries.google.com/complete/search?client=firefox&q="+text
@@ -33,5 +33,5 @@ def correct_google(text,typ="all"):
 correct_google("mmodele",typ="all")
 
 
-""" Spell checker """
+""" # Spell checker # """
 
