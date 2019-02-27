@@ -160,6 +160,8 @@ dump(X_train,"xtrain")
 dump(X_test,"xtest")
 dump(y_train,"ytrain")
 dump(y_test,"ytest")
+dump(converted_train,"convertedtrain")
+dump(converted_test,"convertedtest")
 
 
 
@@ -176,5 +178,8 @@ X_train=load("xtrain")
 X_test=load("xtest")
 y_train=load("ytrain")
 y_test=load("ytest")
+converted_train=load(converted_train,"convertedtrain")
+converted_test=load(converted_test,"convertedtest")
+
 
 
