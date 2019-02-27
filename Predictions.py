@@ -6,7 +6,7 @@ Created on Wed Feb 27 21:37:29 2019
 """
 
 import os 
-os.chdir('D:/Documents/ensae cours/Statapps')
+os.chdir('../Statapps')
 os.getcwd()
 
 
