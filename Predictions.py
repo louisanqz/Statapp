@@ -181,10 +181,9 @@ print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
 """### ################### ###"""
 def construct_model(units=128,dims=[30,300]):
     model = Sequential()
-    model.add(LSTM(units, input_shape=(dims[0], dims[1]),dropout=0.5,recurrent_dropout=0.2,return_sequences=True))
-    model.add(LSTM(32,dropout=0.5))
+    model.add(LSTM(units, input_shape=(dims[0], dims[1]),dropout=0.5,recurrent_dropout=0.2,return_sequences=False))
     model.add(Dense(1, activation='relu'))
-    model.compile(loss='mean_absolute_error',optimizer='adam',metrics=['mae'])
+    model.compile(loss='mean_squared_error',optimizer='adam',metrics=['mae'])
     return model
 
 
