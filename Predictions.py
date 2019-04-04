@@ -23,8 +23,12 @@ from keras.callbacks import ModelCheckpoint
 from sklearn import metrics
 import matplotlib.pyplot as plt
 from matplotlib import pyplot
-from preprocessing_word_vectors import load,pad,to_seq
+import pickle
 
+def load(name):
+    with open(name, 'rb') as fp:
+        file = pickle.load(fp)
+    return file
 
 X_train=load("xtrain")
 X_test=load("xtest")
