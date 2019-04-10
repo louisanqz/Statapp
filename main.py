@@ -81,6 +81,15 @@ pred.evaluate_model(pred.LSTM_predicteur(units=64,dims=[50,300]),X_train,X_test,
 """ #### PREDIRE UN NOUVEAU VERBATIM #### """
 
 
+ls = pred.load_lstm(chemin_model="predi_model.hdf5",units=64,dims=[50,300]) #charger le meilleurs model
+
+#predire la note d'une nouvelle phrase 
+pred.predit_lstm("Je ne suis content ù",51,mot_model,b)
+
+
+""" #### ANALYSE DE L'ERREUR #### """
+
+
 
 
 
