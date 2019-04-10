@@ -213,7 +213,8 @@ class LSTM_predicteur():
 
 """  Predictions of new sentences  """
 
-def predit_lstm(verbatim,maxlen,w2v,chemin_model="model4 - 2layer.hdf5",nb_words=50,units=64,dims=[50,300]):
+
+def load_lstm(chemin_model="predi_model.hdf5",units=64,dims=[50,300]):
     best = Sequential()
     best.add(LSTM(units, input_shape=(dims[0],dims[1]),dropout=0.5,recurrent_dropout=0.2,return_sequences=False))
     best.add(Dense(1, activation='relu'))
@@ -221,9 +222,13 @@ def predit_lstm(verbatim,maxlen,w2v,chemin_model="model4 - 2layer.hdf5",nb_words
     best.compile(loss='mean_squared_error',
               optimizer='adam',
               metrics=['mae'])
+    return best
+    
+
+def predit_lstm(verbatim,maxlen,w2v,best,nb_words=50):
     if type(verbatim)!=str:
         return 10
-    s,_,_,_,_,_=prepro.to_seq([verbatim],w2v)
+    s,_,_,_=prepro.to_seq([verbatim],w2v)
     s=prepro.pad(s,maxlen)
     return best.predict(np.array(s)[:,:nb_words,:])[0][0]  
 
