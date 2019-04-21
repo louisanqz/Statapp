@@ -63,7 +63,25 @@ def resultats_naif(train,test):
     print("Accuracy : ",acc(y_pred,y_test))
     return None
 
-
+def evaluate_naif(train,test,n_bootstrap=100):
+    X=pd.concat([train,test],axis=0)
+    precision=[]
+    for boot in range(n_bootstrap):
+        msk = np.random.rand(len(X)) < 0.8
+        X_train=X[msk]
+        X_test =X[~msk]
+        y_pred=predit(len(X_test),X_train)
+        y_test=np.array(X_test.recommandation_SGK)
+        precision.append(acc(y_pred,y_test))
+    plt.figure(figsize=(10,8))
+    plt.hist(precision,bins=20,facecolor='g', alpha=0.75)
+    plt.xlabel('Précision')
+    plt.ylabel('Fréquence')
+    plt.title("Precision de la methode naive sur "+str(n_bootstrap)+" echantillons bootstrap")
+    plt.grid(False)
+    plt.show()
+    print("Ecart type estimé pour la methode naive : ",round(np.std(precision),3))
+    return None
 
 """ Aggregated-sentence predictions : K-nn, Lasso, Reg Lin --> Benchmark """
 
@@ -143,7 +161,10 @@ def choose_k_knn(X_train,y_train,X_test,y_test,converted_train,converted_test):
         y_pred = knn.predict(ag_test)
         x.append(k)
         y.append(metrics.mean_absolute_error(y_test, y_pred))
+    plt.figure(figsize=(10,8))
     plt.plot(x,y)
+    plt.xlabel('Nombre de voisins')
+    plt.ylabel('Erreur de Validation')
     plt.show()
     print("---------------------------")
     print("Meilleur k :",x[y.index(min(y))])
@@ -165,7 +186,7 @@ class LSTM_predicteur():
         self.w = word_to_use
         
 
-    def fit(self,X_train,y_train,epoch=60):
+    def fit(self,X_train,y_train,epoch=100):
         model = Sequential()
         model.add(LSTM(self.units, input_shape=(self.dims[0], self.dims[1]),dropout=0.5,recurrent_dropout=0.2,return_sequences=False))
         model.add(Dense(1, activation='relu'))
@@ -213,7 +234,6 @@ class LSTM_predicteur():
 
 """  Predictions of new sentences  """
 
-
 def load_lstm(chemin_model="predi_model.hdf5",units=64,dims=[50,300]):
     best = Sequential()
     best.add(LSTM(units, input_shape=(dims[0],dims[1]),dropout=0.5,recurrent_dropout=0.2,return_sequences=False))
@@ -231,5 +251,8 @@ def predit_lstm(verbatim,maxlen,w2v,best,nb_words=50):
     s,_,_,_=prepro.to_seq([verbatim],w2v)
     s=prepro.pad(s,maxlen)
     return best.predict(np.array(s)[:,:nb_words,:])[0][0]  
+
+
+
 
 
