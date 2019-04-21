@@ -60,6 +60,9 @@ viz_class.importants() #donne les variables importantes
 """ #### PREDICTIONS BENCHMARK ET LSTM #### """
 
 """ BENCHMARKING """
+#prediction naive
+pred.resultats_naif(train,test)
+pred.evaluate_naif(train,test,n_bootstrap=500)
 #données agrégé pour algo non lstm : 
 ag_train = pred.agregate_moy(X_train,converted_train)
 ag_test = pred.agregate_moy(X_test,converted_test)
@@ -78,18 +81,30 @@ pred.eval_std(pred.linear_model.LassoCV(cv=5),ag_train,y_train,"LASSO",n_bootstr
 pred.evaluate_model(pred.LSTM_predicteur(units=64,dims=[50,300]),X_train,X_test,y_train,y_test,"LSTM")
 
 
-""" #### PREDIRE UN NOUVEAU VERBATIM #### """
 
+""" #### PREDIRE UN NOUVEAU VERBATIM #### """
 
 ls = pred.load_lstm(chemin_model="predi_model.hdf5",units=64,dims=[50,300]) #charger le meilleurs model
 
 #predire la note d'une nouvelle phrase 
-pred.predit_lstm("Je ne suis content ù",51,mot_model,b)
+pred.predit_lstm("Je ne suis content",50,mot_model,ls)
 
 
 """ #### ANALYSE DE L'ERREUR #### """
 
+from sklearn import metrics
+#Predire sur le train set en entier 
+y_pred_train = ls.predict(X_train[:,:50,:])
 
+#Sur le test set
+y_pred_test = ls.predict(X_test[:,:50,:])
+
+metrics.mean_squared_error(y_pred_train,y_train)
+metrics.mean_absolute_error(y_pred_train,y_train)
+
+
+metrics.mean_squared_error(y_pred_test,y_test)
+metrics.mean_absolute_error(y_pred_test,y_test)
 
 
 
