@@ -17,6 +17,7 @@ from matplotlib import pyplot
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
+from sklearn.neighbors import KNeighborsClassifier
 
 import preprocessing_word_vectors as prepro
 
