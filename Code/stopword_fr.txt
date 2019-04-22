@@ -20,7 +20,7 @@ dedans
 dehors
 donc
 dos
-début
+dÃ©but
 elle
 elles
 en
@@ -39,18 +39,18 @@ la
 le
 les
 leur
-là
+lÃ 
 ma
 maintenant
 mes
 mine
 mon
 mot
-nommés
+nommÃ©s
 notre
 nous
 ou
-où
+oÃ¹
 par
 parce
 peut
@@ -82,12 +82,12 @@ vont
 votre
 vous
 vu
-ça
-étaient
-état
-étions
-été
-être
+Ã§a
+Ã©taient
+Ã©tat
+Ã©tions
+Ã©tÃ©
+Ãªtre
 
 
 
