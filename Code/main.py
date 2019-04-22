@@ -15,7 +15,7 @@ import Descriptives_statistics as desc
 import preprocessing_word_vectors as prepro
 import Bag_of_words_and_lasso as bow_lasso
 import Predictions as pred
-
+import Tfidf as tfidf
 
 """ #### DONNEES BRUTES #### """
 data=pd.read_excel("verbatims_SRC_230118_ENSAE.xlsx") #données complètes
