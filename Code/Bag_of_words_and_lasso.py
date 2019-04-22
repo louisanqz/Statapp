@@ -52,7 +52,7 @@ def clean_sent(sentence):
     
 
 def transform(data):
-    data["clean_sent"]=data["raisons_recommandation"].apply(clean_sent)
+    data["clean_sent"]=data["raisons_recommandation"].apply(str).apply(clean_sent)
     count_vectorizer = CountVectorizer(analyzer="word", tokenizer=None, lowercase = True,preprocessor=None, stop_words=stop_words_list, max_features=5000)
     bag_of_words = count_vectorizer.fit_transform(data["clean_sent"])
     features = count_vectorizer.get_feature_names()
@@ -65,7 +65,21 @@ def transform(data):
     return text_transformed,features
 
 
-
+def transform_bench(data):
+    data["clean_sent"]=data["raisons_recommandation"].apply(str).apply(clean_sent)
+    count_vectorizer = CountVectorizer(analyzer="word", tokenizer=None, lowercase = True,preprocessor=None, stop_words=stop_words_list, max_features=5000)
+    bag_of_words = count_vectorizer.fit_transform(data["clean_sent"])
+    features = count_vectorizer.get_feature_names()
+    columns_to_drop=['017', '07', '08', '10', '15', '19', '20', '207', '217', '29', '69']
+    bag_of_words_array= bag_of_words.toarray()
+    text_transformed = pd.DataFrame(data=bag_of_words_array, columns=features)
+    cd=[]
+    for c in columns_to_drop:
+        if c in text_transformed.columns:
+            cd.append(c)
+    text_transformed=text_transformed.drop(cd, axis=1)
+    text_transformed["sum"]=text_transformed.sum(axis=1)    
+    return text_transformed
 
 
 
