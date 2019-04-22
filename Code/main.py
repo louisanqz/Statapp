@@ -48,6 +48,23 @@ prepro.dump_all(X_train,X_test,y_train,y_test,converted_train,converted_test)
 
 """ #### BAG OF WORDS ET LASSO POUR VISUALISATION DES VARIABLES IMPORTANTES #### """
 
+
+
+#data pour benchmark avec tf idf
+X=bow_lasso.transform_bench(pd.concat([train,test]))
+y=np.hstack((y_train,y_test))
+
+#Regression lineaire
+pred.eval_std(pred.LinearRegression(),X,y,"regression lineaire",n_bootstrap=10)
+
+#8 PPV
+pred.eval_std(pred.KNeighborsClassifier(n_neighbors=8),X,y,"8 PPV",n_bootstrap=10)
+
+#Lasso
+pred.eval_std(pred.linear_model.LassoCV(cv=3),X,y,"Lasso",n_bootstrap=10)
+
+
+
 data_lasso,y_lasso = bow_lasso.prep(data)
 data_lasso_transformed,_ = bow_lasso.transform(data_lasso)
 viz_class = bow_lasso.lasso_viz_imp(20) #pour prendre la classe python qui va plot et donner les variables importantes
