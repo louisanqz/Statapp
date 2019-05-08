@@ -111,7 +111,7 @@ def vect(x_train, x_test, y_train, y_test):
     model.fit(train_corpus_tf_idf,y_train)
     result = model.predict(test_corpus_tf_idf)
     print("MAE=", mae(result,y_test), "//", "acc=", pred.acc(result,y_test), "MSE=", mse(result,y_test) )
-
+    return model.predict(train_corpus_tf_idf),result
 
 #TF IDF POUR LASSO
     
@@ -144,6 +144,8 @@ def vect_lasso(x_train, x_test, y_train, y_test):
     model.fit(train_tf_idf,y_train)
     result = model.predict(test_tf_idf)
     print("MAE=", mae(result,y_test), "//", "acc=", pred.acc(result,y_test),"//", "MSE=", mse(result,y_test) )
+    return model.predict(train_tf_idf),result
+
 
 def viz_lasso(train,test):
     x_train, x_test, y_train, y_test = prep_data_tfidf(train,test)
@@ -205,7 +207,7 @@ def vect_Knn(x_train, x_test, y_train, y_test):
     model.fit(train_corpus_tf_idf,y_train)
     result = model.predict(test_corpus_tf_idf)
     print("MAE=", mae(result,y_test), "//", "acc=", pred.acc(result,y_test), "MSE=", mse(result,y_test) )
-  
+    return model.predict(train_corpus_tf_idf),result
 
 
 
