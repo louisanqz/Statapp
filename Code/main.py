@@ -107,22 +107,96 @@ ls = pred.load_lstm(chemin_model="predi_model.hdf5",units=64,dims=[50,300]) #cha
 pred.predit_lstm("Je ne suis content",50,mot_model,ls)
 
 
+""" #### PREDIRE UN NOUVEAU VERBATIM #### """
+
+ls = pred.load_lstm(chemin_model="predit_model.hdf5",units=64,dims=[50,300]) #charger le meilleurs model
+
+#predire la note d'une nouvelle phrase 
+pred.predit_lstm("Je ne suis content",50,mot_model,ls)
+
+
 """ #### ANALYSE DE L'ERREUR #### """
 
-from sklearn import metrics
-#Predire sur le train set en entier 
-y_pred_train = ls.predict(X_train[:,:50,:])
+bags = bow_lasso.BOWT()
+bags.fit(train)
 
-#Sur le test set
-y_pred_test = ls.predict(X_test[:,:50,:])
+X_train_bow = bags.transforme(train)
+X_test_bow = bags.transforme(test)
 
-metrics.mean_squared_error(y_pred_train,y_train)
-metrics.mean_absolute_error(y_pred_train,y_train)
+#lasso sur bow 
+%time y_pred_train_lassobow,y_pred_test_lassobow = pred.predict_model(pred.linear_model.LassoCV(cv=5),X_train_bow,X_test_bow,y_train,y_test)
+
+#knn sur bow 
+%time y_pred_train_knnbow,y_pred_test_knnbow = pred.predict_model(pred.KNNreg(8),X_train_bow,X_test_bow,y_train,y_test)
+
+#reg lineaire sur bow 
+%time y_pred_train_regbow,y_pred_test_regbow = pred.predict_model(pred.LinearRegression(),X_train_bow,X_test_bow,y_train,y_test)
+
+#prep pour tfidf 
+x_train, x_test, _ , _ = tfidf.prep_data_tfidf(train,test)
+
+#reg lineaire sur tfidf
+%time y_pred_train_regtfidf,y_pred_test_regtfidf = tfidf.vect(x_train, x_test, y_train, y_test)
+
+#lasso sur tfidf
+%time y_pred_train_lassotfidf,y_pred_test_lassotfidf = tfidf.vect_lasso(x_train, x_test, y_train, y_test)
+
+#knn lineaire sur tfidf
+%time y_pred_train_knntfidf,y_pred_test_knntfidf = tfidf.vect_Knn(x_train, x_test, y_train, y_test)
 
 
-metrics.mean_squared_error(y_pred_test,y_test)
-metrics.mean_absolute_error(y_pred_test,y_test)
+#lasso sur embedding
 
+%time y_pred_train_lassoemb,y_pred_test_lassoemb = pred.predict_model(pred.linear_model.LassoCV(cv=5),ag_train,ag_test,y_train,y_test)
+
+#Knn sur embedding
+%time y_pred_train_knnemb,y_pred_test_knnemb = pred.predict_model(pred.KNNreg(8),ag_train,ag_test,y_train,y_test)
+
+#Reg lineraire sur embeding
+%time y_pred_train_regemb,y_pred_test_regemb = pred.predict_model(pred.LinearRegression(),ag_train,ag_test,y_train,y_test)
+
+
+#LSTM
+y_pred_train_lstm = ls.predict(X_train[:,:50,:])
+y_pred_test_lstm = ls.predict(X_test[:,:50,:])
+
+
+#Stocke dans un excel pour les comparaisons 
+#BOW
+train["LASSO_predict_bow"]=y_pred_train_lassobow
+test["LASSO_predict_bow"]=y_pred_test_lassobow
+
+train["knn_predict_bow"]=y_pred_train_knnbow
+test["knn_predict_bow"]=y_pred_test_knnbow
+
+train["reg_predict_bow"]=y_pred_train_regbow
+test["reg_predict_bow"]=y_pred_test_regbow
+
+#TFIDF
+train["LASSO_predict_tfidf"]=y_pred_train_lassotfidf
+test["LASSO_predict_tfidf"]=y_pred_test_lassotfidf
+
+train["knn_predict_tfidf"]=y_pred_train_knntfidf
+test["knn_predict_tfidf"]=y_pred_test_knntfidf
+
+train["reg_predict_tfidf"]=y_pred_train_regtfidf
+test["reg_predict_tfidf"]=y_pred_test_regtfidf
+
+#EMB
+train["LASSO_predict_emb"]=y_pred_train_lassoemb
+test["LASSO_predict_emb"]=y_pred_test_lassoemb
+
+train["knn_predict_emb"]=y_pred_train_knnemb
+test["knn_predict_emb"]=y_pred_test_knnemb
+
+train["reg_predict_emb"]=y_pred_train_regemb
+test["reg_predict_emb"]=y_pred_test_regemb
+
+train["lstm_predict_emb"]=y_pred_train_lstm
+test["lstm_predict_emb"]=y_pred_test_lstm
+
+train.to_excel("train__pred.xlsx")
+test.to_excel("test__pred.xlsx")
 
 
 
