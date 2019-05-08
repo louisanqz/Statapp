@@ -81,7 +81,34 @@ def transform_bench(data):
     text_transformed["sum"]=text_transformed.sum(axis=1)    
     return text_transformed
 
-
+class BOWT:
+    
+    def __init__(self):
+        pass
+    
+    def fit(self,X_train):
+        X_train["clean_sent"]=X_train["raisons_recommandation"].apply(str).apply(clean_sent)
+        count_vectorizer = CountVectorizer(analyzer="word", tokenizer=None, lowercase = True,preprocessor=None, stop_words=stop_words_list, max_features=5000)
+        bag_of_words = count_vectorizer.fit(X_train["clean_sent"])
+        features = count_vectorizer.get_feature_names()
+        self.bag_of_words_ = bag_of_words
+        self.features_ = features
+        return self 
+    
+    def transforme(self,X):
+        if "clean_sent" not in X.columns:
+            X["clean_sent"]=X["raisons_recommandation"].apply(str).apply(clean_sent)
+        columns_to_drop=['017', '07', '08', '10', '15', '19', '20', '207', '217', '29', '69']
+        bag=self.bag_of_words_.transform(X["clean_sent"])
+        bag_of_words_array= bag.toarray()
+        text_transformed = pd.DataFrame(data=bag_of_words_array, columns=self.features_)
+        cd=[]
+        for c in columns_to_drop:
+            if c in text_transformed.columns:
+                cd.append(c)
+        text_transformed=text_transformed.drop(cd, axis=1)
+        text_transformed["sum"]=text_transformed.sum(axis=1)
+        return text_transformed
 
 
 """ ### LASSO IMPORTANT WORDS ### """
