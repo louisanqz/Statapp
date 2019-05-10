@@ -18,6 +18,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsRegressor
 
 import preprocessing_word_vectors as prepro
 
@@ -84,11 +85,14 @@ def evaluate_naif(train,test,n_bootstrap=100):
     print("Ecart type estimé pour la methode naive : ",round(np.std(precision),3))
     return None
 
+
+
 """ Aggregated-sentence predictions : K-nn, Lasso, Reg Lin --> Benchmark """
 
 def evaluate_model(predicteur,X_train,X_test,y_train,y_test,nom_predicteur):
     predicteur.fit(X_train,y_train)
     y_pred = predicteur.predict(X_test)
+    y_pred = np.clip(y_pred, 0, 10)
     print("Résultat pour " + nom_predicteur + " :")
     print("----------------------------")
     print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))  
@@ -99,12 +103,21 @@ def evaluate_model(predicteur,X_train,X_test,y_train,y_test,nom_predicteur):
     return None
 
 
+def predict_model(predicteur,X_train,X_test,y_train,y_test):
+    predicteur.fit(X_train,y_train)
+    y_pred_test = predicteur.predict(X_test)
+    y_pred_train = predicteur.predict(X_train)
+    y_pred_train = np.clip(y_pred_train, 0, 10)
+    y_pred_test = np.clip(y_pred_test, 0, 10)
+    return y_pred_train,y_pred_test
+
 def eval_std(predicteur,X,y,nom_predicteur,n_bootstrap=50):
     precision=[]
     for boot in range(n_bootstrap):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
         predicteur.fit(X_train,y_train)
         y_pred = predicteur.predict(X_test)
+        y_pred = np.clip(y_pred, 0, 10)
         precision.append(acc(y_pred,y_test))
     plt.hist(precision,bins=20,facecolor='g', alpha=0.75)
     plt.xlabel('Précision')
@@ -160,6 +173,7 @@ def choose_k_knn(X_train,y_train,X_test,y_test,converted_train,converted_test):
         knn=KNNreg(k)
         knn.fit(ag_train,y_train)
         y_pred = knn.predict(ag_test)
+        np.clip(y_pred,0,10)
         x.append(k)
         y.append(metrics.mean_absolute_error(y_test, y_pred))
     plt.figure(figsize=(10,8))
@@ -216,11 +230,11 @@ class LSTM_predicteur():
         best = Sequential()
         best.add(LSTM(self.units, input_shape=(self.dims[0], self.dims[1]),dropout=0.5,recurrent_dropout=0.2,return_sequences=False))
         best.add(Dense(1, activation='relu'))
-        best.load_weights("model4 - 2layer.hdf5")
+        best.load_weights("modelaux.hdf5")
         best.compile(loss='mean_squared_error',
               optimizer='adam',
               metrics=['mae'])
-        return best.predict(X_test[:,:self.w,:])
+        return np.clip(best.predict(X_test[:,:self.w,:]),0,10)
 
 """ Reloading best model """
 
@@ -251,7 +265,7 @@ def predit_lstm(verbatim,maxlen,w2v,best,nb_words=50):
         return 10
     s,_,_,_=prepro.to_seq([verbatim],w2v)
     s=prepro.pad(s,maxlen)
-    return best.predict(np.array(s)[:,:nb_words,:])[0][0]  
+    return np.clip(best.predict(np.array(s)[:,:nb_words,:])[0][0],0,10)  
 
 
 
