@@ -6,10 +6,12 @@ Created on Sun Apr  7 15:35:27 2019
 """
 
 """ #### Requirements #### """
+import os 
+os.chdir("D:/Documents/ensae cours/Statapps/code bien")
 
 import pandas as pd
 from gensim.models import KeyedVectors
-
+import numpy as np
 #Autre fichiers code
 import Descriptives_statistics as desc
 import preprocessing_word_vectors as prepro
@@ -48,8 +50,6 @@ prepro.dump_all(X_train,X_test,y_train,y_test,converted_train,converted_test)
 
 """ #### BAG OF WORDS ET LASSO POUR VISUALISATION DES VARIABLES IMPORTANTES #### """
 
-
-
 #data pour benchmark avec tf idf
 X=bow_lasso.transform_bench(pd.concat([train,test]))
 y=np.hstack((y_train,y_test))
@@ -64,7 +64,7 @@ pred.eval_std(pred.KNeighborsClassifier(n_neighbors=8),X,y,"8 PPV",n_bootstrap=1
 pred.eval_std(pred.linear_model.LassoCV(cv=3),X,y,"Lasso",n_bootstrap=10)
 
 
-
+#Visualisation LASSO
 data_lasso,y_lasso = bow_lasso.prep(data)
 data_lasso_transformed,_ = bow_lasso.transform(data_lasso)
 viz_class = bow_lasso.lasso_viz_imp(20) #pour prendre la classe python qui va plot et donner les variables importantes
@@ -73,6 +73,26 @@ viz_class.fit(data_lasso_transformed,y_lasso)
 viz_class.estimate()
 viz_class.viz() #plot des chemins de regularisation
 viz_class.importants() #donne les variables importantes
+
+
+""" #### TF IDF ET LASSO POUR VISUALISATION DES VARIABLES IMPORTANTES #### """
+
+#Mots important et lasso path
+tfidf.viz_lasso(train,test)
+
+
+""" #### PREDICTIONS BENCHMARK TF IDF#### """
+
+x_train, x_test, y_train, y_test = tfidf.prep_data_tfidf(train,test)
+#Linear regression
+_=tfidf.vect(x_train, x_test, y_train, y_test)
+#Lasso
+_=tfidf.vect_lasso(x_train, x_test, y_train, y_test)
+#2 NN
+_=tfidf.vect_Knn(x_train, x_test, y_train, y_test)
+
+
+
 
 """ #### PREDICTIONS BENCHMARK ET LSTM #### """
 
@@ -99,13 +119,6 @@ pred.evaluate_model(pred.LSTM_predicteur(units=64,dims=[50,300]),X_train,X_test,
 
 
 
-""" #### PREDIRE UN NOUVEAU VERBATIM #### """
-
-ls = pred.load_lstm(chemin_model="predi_model.hdf5",units=64,dims=[50,300]) #charger le meilleurs model
-
-#predire la note d'une nouvelle phrase 
-pred.predit_lstm("Je ne suis content",50,mot_model,ls)
-
 
 """ #### PREDIRE UN NOUVEAU VERBATIM #### """
 
@@ -116,6 +129,8 @@ pred.predit_lstm("Je ne suis content",50,mot_model,ls)
 
 
 """ #### ANALYSE DE L'ERREUR #### """
+from sklearn import metrics
+
 
 bags = bow_lasso.BOWT()
 bags.fit(train)
@@ -126,11 +141,20 @@ X_test_bow = bags.transforme(test)
 #lasso sur bow 
 %time y_pred_train_lassobow,y_pred_test_lassobow = pred.predict_model(pred.linear_model.LassoCV(cv=5),X_train_bow,X_test_bow,y_train,y_test)
 
+metrics.mean_absolute_error(y_pred_train_lassobow,y_train)
+metrics.mean_absolute_error(y_pred_test_lassobow,y_test)
+
 #knn sur bow 
 %time y_pred_train_knnbow,y_pred_test_knnbow = pred.predict_model(pred.KNNreg(8),X_train_bow,X_test_bow,y_train,y_test)
 
+metrics.mean_absolute_error(y_pred_train_knnbow,y_train)
+metrics.mean_absolute_error(y_pred_test_knnbow,y_test)
+
 #reg lineaire sur bow 
 %time y_pred_train_regbow,y_pred_test_regbow = pred.predict_model(pred.LinearRegression(),X_train_bow,X_test_bow,y_train,y_test)
+
+metrics.mean_absolute_error(y_pred_train_regbow,y_train)
+metrics.mean_absolute_error(y_pred_test_regbow,y_test)
 
 #prep pour tfidf 
 x_train, x_test, _ , _ = tfidf.prep_data_tfidf(train,test)
@@ -138,27 +162,50 @@ x_train, x_test, _ , _ = tfidf.prep_data_tfidf(train,test)
 #reg lineaire sur tfidf
 %time y_pred_train_regtfidf,y_pred_test_regtfidf = tfidf.vect(x_train, x_test, y_train, y_test)
 
+metrics.mean_absolute_error(y_pred_train_regtfidf,y_train)
+metrics.mean_absolute_error(y_pred_test_regtfidf,y_test)
+
+
 #lasso sur tfidf
 %time y_pred_train_lassotfidf,y_pred_test_lassotfidf = tfidf.vect_lasso(x_train, x_test, y_train, y_test)
+
+metrics.mean_absolute_error(y_pred_train_lassotfidf,y_train)
+metrics.mean_absolute_error(y_pred_test_lassotfidf,y_test)
 
 #knn lineaire sur tfidf
 %time y_pred_train_knntfidf,y_pred_test_knntfidf = tfidf.vect_Knn(x_train, x_test, y_train, y_test)
 
+metrics.mean_absolute_error(y_pred_train_knntfidf,y_train)
+metrics.mean_absolute_error(y_pred_test_knntfidf,y_test)
 
 #lasso sur embedding
 
 %time y_pred_train_lassoemb,y_pred_test_lassoemb = pred.predict_model(pred.linear_model.LassoCV(cv=5),ag_train,ag_test,y_train,y_test)
 
+metrics.mean_absolute_error(y_pred_train_lassoemb,y_train)
+metrics.mean_absolute_error(y_pred_test_lassoemb,y_test)
+
+
 #Knn sur embedding
 %time y_pred_train_knnemb,y_pred_test_knnemb = pred.predict_model(pred.KNNreg(8),ag_train,ag_test,y_train,y_test)
 
+metrics.mean_absolute_error(y_pred_train_knnemb,y_train)
+metrics.mean_absolute_error(y_pred_test_knnemb,y_test)
+
 #Reg lineraire sur embeding
 %time y_pred_train_regemb,y_pred_test_regemb = pred.predict_model(pred.LinearRegression(),ag_train,ag_test,y_train,y_test)
+
+metrics.mean_absolute_error(y_pred_train_regemb,y_train)
+metrics.mean_absolute_error(y_pred_test_regemb,y_test)
 
 
 #LSTM
 y_pred_train_lstm = ls.predict(X_train[:,:50,:])
 y_pred_test_lstm = ls.predict(X_test[:,:50,:])
+
+
+metrics.mean_absolute_error(y_pred_train_lstm,y_train)
+metrics.mean_absolute_error(y_pred_test_lstm,y_test)
 
 
 #Stocke dans un excel pour les comparaisons 
@@ -195,11 +242,7 @@ test["reg_predict_emb"]=y_pred_test_regemb
 train["lstm_predict_emb"]=y_pred_train_lstm
 test["lstm_predict_emb"]=y_pred_test_lstm
 
-train.to_excel("train__pred.xlsx")
-test.to_excel("test__pred.xlsx")
-
-
-
-
+train.to_excel("train_ryme_etienne_pred.xlsx")
+test.to_excel("test_ryme_etienne_pred.xlsx")
 
 
